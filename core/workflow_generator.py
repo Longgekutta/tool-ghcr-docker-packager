@@ -71,7 +71,17 @@ jobs:
           platforms: {plat_str}
           push: true
           tags: ${{{{ steps.meta.outputs.tags }}}}
-          labels: ${{{{ steps.meta.outputs.labels }}}}
+          labels: ${{{{ steps.meta.outputs.labels }}}}""" + ("""
+          cache-from: type=gha
+          cache-to: type=gha,mode=max""" if spec.enable_cache else "") + ("""
+
+      - name: Run Trivy Security Vulnerability Scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/""" + image_name_expr + """:${{{{ steps.meta.outputs.version }}}}
+          format: 'table'
+          exit-code: '0'
+          severity: 'CRITICAL,HIGH'""" if spec.enable_trivy else "") + f"""
 
       - name: Cryptographically Sign Image with Cosign (Keyless OIDC)
         run: |

@@ -77,5 +77,18 @@ class TestGhcrPackagerOffline(unittest.TestCase):
             bad_df.write_text("hello world\n", encoding="utf-8")
             self.assertFalse(builder.validate_dockerfile(bad_df))
 
+    def test_06_workflow_generator_with_cache_and_trivy(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            spec = ContainerSpec(owner="my-team", image_name="ai-kernel", enable_cache=True, enable_trivy=True)
+            gen = GhcrWorkflowGenerator()
+            wf_file = gen.write_workflow(tmp, spec)
+
+            content = wf_file.read_text(encoding="utf-8")
+            self.assertIn("cache-from: type=gha", content)
+            self.assertIn("cache-to: type=gha,mode=max", content)
+            self.assertIn("aquasecurity/trivy-action", content)
+            self.assertIn("Run Trivy Security Vulnerability Scan", content)
+
 if __name__ == "__main__":
     unittest.main()

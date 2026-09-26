@@ -28,6 +28,8 @@ class ContainerSpec:
     dockerfile_path: str = "Dockerfile"
     context_path: str = "."
     enable_push: bool = True
+    enable_cache: bool = True
+    enable_trivy: bool = True
 
     def get_primary_image_ref(self) -> str:
         clean_owner = self.owner.lower().lstrip("@")
